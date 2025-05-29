@@ -1,15 +1,13 @@
+version: "3.8"
+
 services:
   db:
     image: postgres:14
     restart: always
     ports:
       - "${POSTGRES_PORT}:5432"
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - ./tmp/db:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     env_file:
       - .env.production
 
@@ -18,19 +16,13 @@ services:
       context: .
       args:
         RAILS_ENV: ${RAILS_ENV}
-    environment:
-      RAILS_ENV: ${RAILS_ENV}
-      DATABASE_URL: ${DATABASE_URL}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+    env_file:
+      - .env.production
     ports:
       - "3000:3000"
     depends_on:
       - db
     command: bundle exec puma -C config/puma.rb
-    env_file:
-      - .env.production
+
+volumes:
+  pgdata:
