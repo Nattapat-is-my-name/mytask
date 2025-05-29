@@ -1,32 +1,60 @@
-<%= form_with(model: task, class: "contents") do |form| %>
-  <% if task.errors.any? %>
-    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3">
-      <h2><%= pluralize(task.errors.count, "error") %> prohibited this task from being saved:</h2>
-
-      <ul class="list-disc ml-6">
-        <% task.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
-
-  <div class="my-5">
-    <%= form.label :title %>
-    <%= form.text_field :title, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": task.errors[:title].none?, "border-red-400 focus:outline-red-600": task.errors[:title].any?}] %>
+<%# This should be wrapped in the same container as your index page %>
+<section class="min-h-screen flex justify-center items-center">
+  <div class="w-full max-w-4xl mx-auto px-4 py-8">
+    <header class="flex justify-between items-center mb-8">
+      <h1 class="text-3xl font-extrabold tracking-tight text-gray-900">
+        <%= task.persisted? ? "Edit Task" : "New Task" %>
+      </h1>
+      <%= link_to "Back to Tasks", tasks_path, class: "inline-block rounded-md bg-gray-100 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-200 transition" %>
+    </header>
+    <%= form_with(model: task, class: "contents") do |form| %>
+      <% if task.errors.any? %>
+        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+          <h2 class="text-sm font-medium text-red-800 mb-2">
+            Please update the due date and time for follow-up task.
+          </h2>
+          <ul class="list-disc ml-5 text-sm text-red-700 space-y-1">
+            <% task.errors.each do |error| %>
+              <li><%= error.full_message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+      <div class="bg-white shadow-sm border border-gray-200 rounded-md p-6 space-y-6">
+        <div>
+          <%= form.label :title, class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_field :title, 
+                placeholder: "Enter task title...",
+                class: [
+                  "block w-full px-3 py-2 border rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                  task.errors[:title].any? ? "border-red-300" : "border-gray-300"
+                ] %>
+        </div>
+        <div>
+          <%= form.label :due_time, "Due Date & Time", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.datetime_local_field :due_time,
+                min: Time.zone.now.strftime("%Y-%m-%dT%H:%M"),
+                class: [
+                  "block w-full px-3 py-2 border rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                  task.errors[:due_time].any? ? "border-red-300" : "border-gray-300"
+                ] %>
+        </div>
+        <div>
+          <%= form.label :status, class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_field :status, 
+                placeholder: "Enter status...",
+                class: [
+                  "block w-full px-3 py-2 border rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                  task.errors[:status].any? ? "border-red-300" : "border-gray-300"
+                ] %>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 pt-4">
+          <%= link_to "Cancel", tasks_path, 
+                class: "rounded-md px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 transition text-center" %>
+          <%= form.submit task.persisted? ? "Update Task" : "Create Task",
+                class: "rounded-md px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-500 transition cursor-pointer" %>
+        </div>
+      </div>
+    <% end %>
   </div>
-
-  <div class="my-5">
-    <%= form.label :due_time %>
-    <%= form.datetime_field :due_time, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": task.errors[:due_time].none?, "border-red-400 focus:outline-red-600": task.errors[:due_time].any?}] %>
-  </div>
-
-  <div class="my-5">
-    <%= form.label :status %>
-    <%= form.text_field :status, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": task.errors[:status].none?, "border-red-400 focus:outline-red-600": task.errors[:status].any?}] %>
-  </div>
-
-  <div class="inline">
-    <%= form.submit class: "w-full sm:w-auto rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
-  </div>
-<% end %>
+</section>
