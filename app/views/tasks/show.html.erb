@@ -1,15 +1,118 @@
-<% content_for :title, "Showing task" %>
-
-<div class="md:w-2/3 w-full">
+<% content_for :title, "Task Details" %>
+<section class="w-full max-w-4xl mx-auto px-4 py-8">
   <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
+    <p class="py-2 px-4 mb-6 bg-green-100 text-green-700 border border-green-300 rounded-md shadow-sm" id="notice">
+      <%= notice %>
+    </p>
   <% end %>
-
-  <h1 class="font-bold text-4xl">Showing task</h1>
-
-  <%= render @task %>
-
-  <%= link_to "Edit this task", edit_task_path(@task), class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-  <%= link_to "Back to tasks", tasks_path, class: "w-full sm:w-auto text-center mt-2 sm:mt-0 sm:ml-2 rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-  <%= button_to "Destroy this task", @task, method: :delete, form_class: "sm:inline-block mt-2 sm:mt-0 sm:ml-2", class: "w-full rounded-md px-3.5 py-2.5 text-white bg-red-600 hover:bg-red-500 font-medium cursor-pointer", data: { turbo_confirm: "Are you sure?" } %>
-</div>
+  <header class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-extrabold tracking-tight text-gray-900">Task Details</h1>
+  </header>
+  <!-- Main Task Card -->
+  <article class="bg-white shadow-sm border border-gray-200 rounded-md p-6 mb-6">
+    <!-- Overdue Warning -->
+    <% if @task.overdue? && !@task.completed? %>
+      <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-red-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="text-red-800 font-medium">This task is overdue by <%= time_ago_in_words(@task.due_time) %></span>
+        </div>
+      </div>
+    <% end %>
+    <!-- Task Title with Checkbox -->
+    <div class="flex items-center space-x-3 mb-6 pb-6 border-b border-gray-100">
+      <%= form_with model: @task, method: :patch, local: true do |f| %>
+        <%= f.check_box :completed, { 
+          checked: @task.completed, 
+          onchange: 'this.form.submit()', 
+          class: 'h-6 w-6 text-blue-600 border-gray-300 rounded' 
+        } %>
+      <% end %>
+      <h2 class="<%= 'line-through text-gray-400' if @task.should_strikethrough? %> text-2xl font-semibold text-gray-900">
+        <%= @task.title %>
+      </h2>
+    </div>
+    <!-- Task Details Grid -->
+    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div>
+        <dt class="text-sm font-medium text-gray-500 mb-1">Due Date & Time</dt>
+        <dd class="<%= 'text-red-600 font-medium' if @task.overdue? && !@task.completed? %> text-base">
+          <%= @task.due_time&.strftime("%B %d, %Y at %l:%M %p") || "No due date set" %>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500 mb-1">Status</dt>
+        <dd class="text-base">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= 
+            case @task.status&.downcase
+            when 'completed'
+              'bg-green-100 text-green-800'
+            when 'in_progress', 'in progress'
+              'bg-blue-100 text-blue-800'
+            when 'on_hold', 'on hold'
+              'bg-yellow-100 text-yellow-800'
+            when 'cancelled'
+              'bg-red-100 text-red-800'
+            else
+              'bg-gray-100 text-gray-800'
+            end
+          %>">
+            <%= @task.status.presence || "Not set" %>
+          </span>
+        </dd>
+      </div>
+    </dl>
+    <!-- Completion Status -->
+    <dl class="mb-6">
+      <dt class="text-sm font-medium text-gray-500 mb-1">Completion Status</dt>
+      <dd class="flex items-center">
+        <% if @task.completed? %>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            Completed
+          </span>
+        <% elsif @task.overdue? && !@task.completed? %>
+          <!-- Overdue Status -->
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+            </svg>
+            Overdue
+          </span>
+        <% else %>
+          <!-- In Progress Status -->
+          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+            </svg>
+            In Progress
+          </span>
+        <% end %>
+      </dd>
+    </dl>
+  </article>
+  <!-- Action Buttons -->
+  <nav class="flex flex-wrap gap-3">
+    <%= link_to "Edit Task", edit_task_path(@task), 
+          class: "rounded-md px-4 py-2 text-sm font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors" %>
+    <%= link_to "Back to Tasks", tasks_path, 
+          class: "rounded-md px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 transition-colors" %>
+    <%= link_to confirm_delete_task_path(@task), 
+          data: { 
+            turbo_frame: "modal",
+            turbo_action: "advance" 
+          },
+          class: "group rounded-md px-4 py-2 text-sm font-medium bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-200 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1" do %>
+      <span class="flex items-center space-x-1">
+        <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+        </svg>
+        <span>Delete Task</span>
+      </span>
+    <% end %>
+  </nav>
+</section>
