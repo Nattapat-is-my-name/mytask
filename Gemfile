@@ -68,4 +68,5 @@ group :test do
   # System testing tools
   gem "capybara"
   gem "selenium-webdriver"
+  gem "simplecov", require: false
 end
