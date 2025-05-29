@@ -4,7 +4,7 @@ class TasksController < ApplicationController
   def index
     @tasks = Task.all.sort_by do |task|
       if task.completed?
-        [ 4, task.due_time || Time.current ]  # Completed tasks last
+        [ 4, task.due_time || Time.current ]
       elsif task.due_time.nil?
         [ 3, 1.year.from_now ]  # Tasks with no due date
       else
