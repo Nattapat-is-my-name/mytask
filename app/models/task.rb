@@ -12,6 +12,7 @@ class Task < ApplicationRecord
     completed? || overdue?
   end
 
+
   private
 
   def due_time_cannot_be_in_the_past
