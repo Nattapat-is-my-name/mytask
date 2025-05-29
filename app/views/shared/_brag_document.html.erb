@@ -1,0 +1,169 @@
+<!-- Brag Document Modal/Section -->
+<div id="brag-document" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+  <div class="relative top-8 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white">
+    <!-- Close Button -->
+    <div class="flex justify-end mb-4">
+      <button onclick="closeBragDocument()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">
+        &times;
+      </button>
+    </div>
+    <!-- Content -->
+    <div class="max-h-screen ">
+      <!-- Header -->
+      <div class="text-center mb-6">
+        <%= image_tag "boss.JPG", 
+        class: "h-20 w-20 mx-auto rounded-full object-cover border-4 border-white shadow-lg ring-2 ring-blue-200 mb-4",
+        alt: "Profile" %>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Nattapat Teeranuntachai</h1>
+        <p class="text-lg text-blue-600 font-medium mb-1">Developer - Maverick Team</p>
+        <p class="text-gray-600">Building efficient solutions with Ruby on Rails</p>
+      </div>
+      <!-- Live Stats -->
+      <div class="mb-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4 text-center">My Task Management Stats</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="bg-gray-50 p-3 rounded-lg text-center">
+            <div class="text-xl font-bold text-blue-600"><%= Task.count %></div>
+            <div class="text-xs text-gray-600">Total Tasks</div>
+          </div>
+          <div class="bg-gray-50 p-3 rounded-lg text-center">
+            <div class="text-xl font-bold text-green-600"><%= Task.where(completed: true).count %></div>
+            <div class="text-xs text-gray-600">Completed</div>
+          </div>
+          <div class="bg-gray-50 p-3 rounded-lg text-center">
+            <div class="text-xl font-bold text-orange-600"><%= Task.where(completed: false).where('due_time > ?', Time.current).count %></div>
+            <div class="text-xs text-gray-600">In Progress</div>
+          </div>
+          <div class="bg-gray-50 p-3 rounded-lg text-center">
+            <div class="text-xl font-bold text-red-600"><%= Task.where('due_time < ? AND completed = ?', Time.current, false).count %></div>
+            <div class="text-xs text-gray-600">Overdue</div>
+          </div>
+        </div>
+      </div>
+      <!-- Completion Rate -->
+      <% 
+        total_tasks = Task.count
+        completed_tasks = Task.where(completed: true).count
+        completion_rate = total_tasks > 0 ? ((completed_tasks.to_f / total_tasks) * 100).round : 0
+      %>
+      <div class="mb-6">
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <h3 class="font-semibold text-gray-900 mb-3">Task Completion Rate</h3>
+          <div class="flex items-center">
+            <div class="flex-1 bg-gray-200 rounded-full h-3 mr-3">
+              <div class="bg-green-500 h-3 rounded-full" style="width: <%= completion_rate %>%"></div>
+            </div>
+            <span class="font-bold text-green-600"><%= completion_rate %>%</span>
+          </div>
+          <p class="text-sm text-gray-600 mt-2">
+            <%= completed_tasks %> out of <%= total_tasks %> tasks completed
+          </p>
+        </div>
+      </div>
+      <!-- Recent Activity -->
+      <div class="mb-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-3">Recent Activity</h2>
+        <div class="bg-gray-50 rounded-lg">
+          <% recent_tasks = Task.order(updated_at: :desc).limit(3) %>
+          <% if recent_tasks.any? %>
+            <% recent_tasks.each_with_index do |task, index| %>
+              <div class="p-3 <%= 'border-b border-gray-200' unless index == recent_tasks.count - 1 %>">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <h3 class="font-medium text-gray-900 text-sm <%= 'line-through text-gray-500' if task.completed? %>">
+                      <%= task.title %>
+                    </h3>
+                    <p class="text-xs text-gray-500">
+                      <%= time_ago_in_words(task.created_at) %> ago
+                    </p>
+                  </div>
+                  <div class="ml-3">
+                    <% if task.completed? %>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Completed
+                      </span>
+                    <% elsif task.overdue? %>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Overdue
+                      </span>
+                    <% else %>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        In Progress
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="p-4 text-center text-gray-500 text-sm">
+              No tasks yet. Start creating some tasks!
+            </div>
+          <% end %>
+        </div>
+      </div>
+      <!-- 2025 Goals -->
+      <div class="mb-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-3">🎯 2025 Goals</h2>
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <ul class="space-y-3">
+            <li class="flex items-center text-sm">
+              <div class="flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full mr-3">
+                <svg class="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <span class="text-gray-700">Handle tickets independently from start to finish</span>
+            </li>
+            <li class="flex items-center text-sm">
+              <div class="flex items-center justify-center w-6 h-6 bg-green-100 rounded-full mr-3">
+                <svg class="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <span class="text-gray-700">Submit clean PRs that merge without comments</span>
+            </li>
+            <li class="flex items-center text-sm">
+              <div class="flex items-center justify-center w-6 h-6 bg-purple-100 rounded-full mr-3">
+                <svg class="w-3 h-3 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <span class="text-gray-700">Launch a real startup project</span>
+            </li>
+            <li class="flex items-center text-sm">
+              <div class="flex items-center justify-center w-6 h-6 bg-orange-100 rounded-full mr-3">
+                <svg class="w-3 h-3 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+              </div>
+              <span class="text-gray-700">Pass the farming project certification</span>
+            </li>
+            <li class="flex items-center text-sm">
+              <div class="flex items-center justify-center w-6 h-6 bg-red-100 rounded-full mr-3">
+                <svg class="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM9 8a2 2 0 113 1.732V19a1 1 0 11-2 0v-1.268A2 2 0 119 8z"/>
+                  <path d="M5 4a4 4 0 114.446 3.032A3.993 3.993 0 009 4z"/>
+                </svg>
+              </div>
+              <span class="text-gray-700">Become a mentor and problem solver for teammates</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <script>
+        function showBragDocument() {
+          document.getElementById('brag-document').classList.remove('hidden');
+        }
+
+        function closeBragDocument() {
+          document.getElementById('brag-document').classList.add('hidden');
+        }
+
+        // Close when clicking outside
+        document.getElementById('brag-document').addEventListener('click', function(e) {
+          if (e.target === this) {
+            closeBragDocument();
+          }
+        });
+      </script>

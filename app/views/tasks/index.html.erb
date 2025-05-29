@@ -1,29 +1,123 @@
 <% content_for :title, "Tasks" %>
-
-<div class="w-full">
+<section class="w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 pt-10 sm:py-8 lg:pt-10 flex flex-col justify-center min-h-screen">
   <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
+    <p class="py-2 px-4 mb-4 sm:mb-6 bg-green-100 text-green-700 border border-green-300 rounded-md shadow-sm text-sm" id="notice">
+      <%= notice %>
+    </p>
   <% end %>
-
-  <div class="flex justify-between items-center">
-    <h1 class="font-bold text-4xl">Tasks</h1>
-    <%= link_to "New task", new_task_path, class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
+  <!-- Profile Section -->
+  <div class="mb-8 sm:mb-10 p-4 sm:p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+    <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+      <!-- Profile Info -->
+      <div class="flex items-center space-x-4 sm:space-x-6 flex-1">
+        <div class="flex-shrink-0">
+          <%= image_tag "boss.JPG", 
+      class: "h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 rounded-full object-cover border-4 border-white shadow-lg ring-2 ring-blue-200",
+      alt: "Profile" %>
+        </div>
+        <div class="flex flex-col">
+          <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1">Nattapat Teeranuntachai</h2>
+          <p class="text-base sm:text-lg text-blue-600 font-medium">Maverick Team</p>
+          <p class="text-sm text-gray-500 mt-1">Developer</p>
+        </div>
+      </div>
+      <!-- Button Section -->
+      <div class="flex justify-center sm:justify-end">
+        <button onclick="showBragDocument()" class="inline-flex items-center px-4 py-2 bg-white border border-blue-200 rounded-md shadow-sm text-sm font-medium text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          View Portfolio
+        </button>
+      </div>
+    </div>
   </div>
-
-  <div id="tasks" class="min-w-full divide-y divide-gray-200 space-y-5">
+  <header class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">My Tasks</h1>
     <% if @tasks.any? %>
-      <% @tasks.each do |task| %>
-        <div class="flex flex-col sm:flex-row justify-between items-center pb-5 sm:pb-0">
-          <%= render task %>
-          <div class="w-full sm:w-auto flex flex-col sm:flex-row space-x-2 space-y-2">
-            <%= link_to "Show", task, class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-            <%= link_to "Edit", edit_task_path(task), class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-            <%= button_to "Destroy", task, method: :delete, class: "w-full sm:w-auto rounded-md px-3.5 py-2.5 text-white bg-red-600 hover:bg-red-500 font-medium cursor-pointer", data: { turbo_confirm: "Are you sure?" } %>
+      <%= link_to "Assign Task", new_task_path, class: "inline-block rounded-md bg-blue-600 px-4 sm:px-5 py-2 sm:py-2.5 text-sm font-medium text-white hover:bg-blue-500 transition w-full sm:w-auto text-center" %>
+    <% end %>
+  </header>
+  <% if @tasks.any? %>
+    <% 
+      overdue_tasks = @tasks.select { |task| task.overdue? && !task.completed? }
+      in_progress_tasks = @tasks.select { |task| !task.completed? && !task.overdue? }
+      completed_tasks = @tasks.select { |task| task.completed? }
+    %>
+    <!-- Overdue Tasks Section -->
+    <% if overdue_tasks.any? %>
+      <div class="mb-8">
+        <div class="flex items-center mb-4">
+          <div class="flex items-center space-x-2">
+            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+            </svg>
+            <h2 class="text-xl font-bold text-red-600">Overdue Tasks</h2>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              <%= overdue_tasks.count %>
+            </span>
           </div>
         </div>
-      <% end %>
-    <% else %>
-      <p class="text-center my-10">No tasks found.</p>
+        <section id="overdue-tasks" class="space-y-4">
+          <% overdue_tasks.each do |task| %>
+            <%= render 'task_card', task: task %>
+          <% end %>
+        </section>
+      </div>
     <% end %>
-  </div>
-</div>
+    <!-- In Progress Tasks Section -->
+    <% if in_progress_tasks.any? %>
+      <div class="mb-8">
+        <div class="flex items-center mb-4">
+          <div class="flex items-center space-x-2">
+            <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+            </svg>
+            <h2 class="text-xl font-bold text-blue-600">In Progress</h2>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <%= in_progress_tasks.count %>
+            </span>
+          </div>
+        </div>
+        <section id="in-progress-tasks" class="space-y-4">
+          <% in_progress_tasks.each do |task| %>
+            <%= render 'task_card', task: task %>
+          <% end %>
+        </section>
+      </div>
+    <% end %>
+    <!-- Completed Tasks Section -->
+    <% if completed_tasks.any? %>
+      <div class="mb-8">
+        <div class="flex items-center mb-4">
+          <div class="flex items-center space-x-2">
+            <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <h2 class="text-xl font-bold text-green-600">Completed</h2>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <%= completed_tasks.count %>
+            </span>
+          </div>
+        </div>
+        <section id="completed-tasks" class="space-y-4">
+          <% completed_tasks.each do |task| %>
+            <%= render 'task_card', task: task %>
+          <% end %>
+        </section>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="text-center py-8 sm:py-12">
+      <svg class="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a-2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No tasks</h3>
+      <p class="mt-1 text-sm text-gray-500">Get started by creating your first task.</p>
+      <div class="mt-6">
+        <%= link_to "New Task", new_task_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto justify-center" %>
+      </div>
+    </div>
+  <% end %>
+</section>
+<%= render 'shared/brag_document' %>
