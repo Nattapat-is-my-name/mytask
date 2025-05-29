@@ -44,6 +44,7 @@ gem "thruster", require: false
 # Optional: Image processing for Active Storage
 # gem "image_processing", "~> 1.2"
 
+gem "dotenv-rails"
 group :development, :test do
   # Debugging tools
   gem "debug", platforms: %i[mri windows], require: "debug/prelude"
