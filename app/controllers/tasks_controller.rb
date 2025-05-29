@@ -1,25 +1,57 @@
 class TasksController < ApplicationController
-  before_action :set_task, only: %i[ show edit update destroy ]
+  before_action :set_task, only: %i[show edit update destroy confirm_delete]
 
-  # GET /tasks or /tasks.json
   def index
-    @tasks = Task.all
+    @tasks = Task.all.sort_by do |task|
+      if task.completed?
+        [ 4, task.due_time || Time.current ]  # Completed tasks last
+      elsif task.due_time.nil?
+        [ 3, 1.year.from_now ]  # Tasks with no due date
+      else
+        time_diff = task.due_time - Time.current
+
+        if time_diff > 0
+          # Future tasks - closer to due date = higher priority (lower number)
+          [ 1, time_diff ]  # Due soon tasks first (sorted by time remaining)
+        else
+          # Overdue tasks - more overdue = lower priority (higher number)
+          [ 2, time_diff.abs ]  # Overdue tasks second (sorted by how overdue)
+        end
+      end
+    end
   end
 
-  # GET /tasks/1 or /tasks/1.json
-  def show
+class TasksController < ApplicationController
+  before_action :set_task, only: %i[show edit update destroy confirm_delete]
+
+  def index
+    @tasks = Task.all.sort_by do |task|
+      if task.completed?
+        [ 4, task.due_time || Time.current ]  # Completed tasks last
+      elsif task.due_time.nil?
+        [ 3, 1.year.from_now ]  # Tasks with no due date
+      else
+        time_diff = task.due_time - Time.current
+
+        if time_diff > 0
+          # Future tasks - closer to due date = higher priority (lower number)
+          [ 1, time_diff ]  # Due soon tasks first (sorted by time remaining)
+        else
+          # Overdue tasks - more overdue = lower priority (higher number)
+          [ 2, time_diff.abs ]  # Overdue tasks second (sorted by how overdue)
+        end
+      end
+    end
   end
 
-  # GET /tasks/new
+  def show; end
+
   def new
     @task = Task.new
   end
 
-  # GET /tasks/1/edit
-  def edit
-  end
+  def edit; end
 
-  # POST /tasks or /tasks.json
   def create
     @task = Task.new(task_params)
 
@@ -34,11 +66,16 @@ class TasksController < ApplicationController
     end
   end
 
-  # PATCH/PUT /tasks/1 or /tasks/1.json
   def update
     respond_to do |format|
       if @task.update(task_params)
-        format.html { redirect_to @task, notice: "Task was successfully updated." }
+        # Check if request came from index page (checkbox toggle)
+        if request.referer&.include?(tasks_path) || params[:from_index]
+          format.html { redirect_to tasks_path }
+        else
+          format.html { redirect_to @task, notice: "Task was successfully updated." }
+        end
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("task_#{@task.id}", partial: "task", locals: { task: @task }) }
         format.json { render :show, status: :ok, location: @task }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -47,24 +84,93 @@ class TasksController < ApplicationController
     end
   end
 
-  # DELETE /tasks/1 or /tasks/1.json
   def destroy
-    @task.destroy!
-
-    respond_to do |format|
-      format.html { redirect_to tasks_path, status: :see_other, notice: "Task was successfully destroyed." }
-      format.json { head :no_content }
+    if @task.destroy
+      respond_to do |format|
+        format.html { redirect_to tasks_path, status: :see_other, notice: "Task was successfully destroyed." }
+        format.json { head :no_content }
+      end
+    else
+      redirect_to tasks_path, alert: "Failed to delete task."
     end
   end
 
-  private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_task
-      @task = Task.find(params.expect(:id))
-    end
+  def confirm_delete
+    # Renders confirm_delete.html.erb
+  end
 
-    # Only allow a list of trusted parameters through.
-    def task_params
-      params.expect(task: [ :title, :due_time, :status ])
+  private
+
+  def set_task
+    @task = Task.find(params[:id])
+  end
+
+  def task_params
+    params.require(:task).permit(:title, :due_time, :status, :completed)
+  end
+end
+  def show; end
+
+  def new
+    @task = Task.new
+  end
+
+  def edit; end
+
+  def create
+    @task = Task.new(task_params)
+
+    respond_to do |format|
+      if @task.save
+        format.html { redirect_to @task, notice: "Task was successfully created." }
+        format.json { render :show, status: :created, location: @task }
+      else
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: @task.errors, status: :unprocessable_entity }
+      end
     end
+  end
+
+  def update
+    respond_to do |format|
+      if @task.update(task_params)
+        # Check if request came from index page (checkbox toggle)
+        if request.referer&.include?(tasks_path) || params[:from_index]
+          format.html { redirect_to tasks_path }
+        else
+          format.html { redirect_to @task, notice: "Task was successfully updated." }
+        end
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("task_#{@task.id}", partial: "task", locals: { task: @task }) }
+        format.json { render :show, status: :ok, location: @task }
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @task.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  def destroy
+    if @task.destroy
+      respond_to do |format|
+        format.html { redirect_to tasks_path, status: :see_other, notice: "Task was successfully destroyed." }
+        format.json { head :no_content }
+      end
+    else
+      redirect_to tasks_path, alert: "Failed to delete task."
+    end
+  end
+
+  def confirm_delete
+    # Renders confirm_delete.html.erb
+  end
+
+  private
+
+  def set_task
+    @task = Task.find(params[:id])
+  end
+
+  def task_params
+    params.require(:task).permit(:title, :due_time, :status, :completed)
+  end
 end
