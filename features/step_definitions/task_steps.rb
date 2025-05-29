@@ -33,16 +33,18 @@ When('I click {string}') do |button_text|
   click_button button_text
 end
 
-# Task interaction steps
+# Task interaction steps - FIXED FOR AMBIGUOUS MATCHES
 When('I check the completion checkbox for {string}') do |task_title|
-  task_element = find('article', text: task_title)
+  # Use first() to avoid ambiguous match error
+  task_element = first('article', text: task_title)
   within(task_element) do
     check('task[completed]')
   end
 end
 
 When('I click the delete button for {string}') do |task_title|
-  task_element = find('article', text: task_title)
+  # Use first() to avoid ambiguous match error
+  task_element = first('article', text: task_title)
   within(task_element) do
     click_link 'Delete'
   end
