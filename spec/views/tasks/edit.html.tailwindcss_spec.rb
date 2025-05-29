@@ -4,8 +4,7 @@ RSpec.describe "tasks/edit", type: :view do
   let(:task) {
     Task.create!(
       title: "MyString",
-      status: "MyString",
-      due_time: 1.day.from_now  # Add this line
+      due_time: 1.day.from_now
     )
   }
 
@@ -18,7 +17,7 @@ RSpec.describe "tasks/edit", type: :view do
 
     assert_select "form[action=?][method=?]", task_path(task), "post" do
       assert_select "input[name=?]", "task[title]"
-      assert_select "input[name=?]", "task[status]"
+      assert_select "input[name=?]", "task[due_time]"
     end
   end
 end
