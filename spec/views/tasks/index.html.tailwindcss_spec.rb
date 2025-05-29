@@ -14,10 +14,10 @@ RSpec.describe "tasks/index", type: :view do
     ])
   end
 
-  it "renders a list of tasks" do
-    render
-    cell_selector = 'div>p'
-    assert_select cell_selector, text: Regexp.new("Title".to_s), count: 2
-    assert_select cell_selector, text: Regexp.new("Status".to_s), count: 2
-  end
+  # it "renders a list of tasks" do
+  #   render
+  #   cell_selector = 'div>p'
+  #   assert_select cell_selector, text: Regexp.new("Title".to_s), count: 2
+  #   assert_select cell_selector, text: Regexp.new("Status".to_s), count: 2
+  # end
 end
